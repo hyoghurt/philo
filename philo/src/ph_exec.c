@@ -2,58 +2,56 @@
 
 void	*ft_phil(void *arg)
 {
-	t_phil	*tmp;
-	int		flag;
+	t_phil			*tmp;
+	pthread_t		pthr;
 
 	tmp = (t_phil *)arg;
-	flag = 1;
-	while (flag)
+	pthread_create(&pthr, 0, ph_died, tmp);
+	while (1)
 	{
-		while (flag)
-		{
-			pthread_mutex_lock(tmp->mut);
-			if (tmp->t_die < (ph_get_time() - tmp->start_eat))
-				return (ph_print_died(tmp));
-			pthread_mutex_unlock(tmp->mut);
-			flag = ph_take_fork(tmp);
-			usleep(400);
-		}
-		flag = ph_eating_and_sleeping(tmp);
+		ph_print_status(tmp, "is thinking");
+		pthread_mutex_lock(tmp->right_fork);
+		pthread_mutex_lock(tmp->left_fork);
+		ph_print_status(tmp, "has taken a fork");
+		tmp->start_eat = ph_get_time();
+		ph_print_status(tmp, "is eating");
+		ph_usleep_eat(tmp);
+		*tmp->eat = *tmp->eat + 1;
+		pthread_mutex_unlock(tmp->left_fork);
+		pthread_mutex_unlock(tmp->right_fork);
+		ph_print_status(tmp, "is sleeping");
+		ph_usleep_sleep(tmp);
 	}
 	return (0);
 }
 
-int	ph_take_fork(t_phil *tmp)
+void	*ph_died(void *arg)
 {
-	pthread_mutex_lock(tmp->mut);
-	if (*tmp->small)
+	t_phil			*tmp;
+
+	tmp = (t_phil *)arg;
+	while (1)
 	{
-		*tmp->small = 0;
-		if (*tmp->big)
+		if (*(tmp->death) == 1)
+			return (0);
+		if (tmp->t_die < (ph_get_time() - tmp->start_eat))
 		{
-			*tmp->big = 0;
-			tmp->start_eat = ph_get_time();
-			if (!ph_print_fork(tmp))
-				return (1);
+			if (*(tmp->death) == 1)
+				return (0);
+			pthread_mutex_lock(tmp->print);
+			*(tmp->death) = 1;
+			printf("%8ld %3d died\n", ph_get_time() - tmp->start, tmp->phil);
 			return (0);
 		}
-		else
-			*tmp->small = 1;
+		usleep(300);
 	}
-	pthread_mutex_unlock(tmp->mut);
-	return (1);
+	return (0);
 }
 
-int	ph_eating_and_sleeping(t_phil *tmp)
+int	ph_print_status(t_phil *tmp, char *status)
 {
-	if (!ph_eating(tmp))
-		return (0);
-	if (tmp->n_must_eat > 0 && ph_num_eat(tmp))
-		return (0);
-	if (!ph_sleeping(tmp))
-		return (0);
-	if (!ph_print_status(tmp, "is thinking"))
-		return (0);
-	usleep(100);
+	pthread_mutex_lock(tmp->print);
+	printf("%8ld %3d %s\n", ph_get_time() - tmp->start, tmp->phil, status);
+	pthread_mutex_unlock(tmp->print);
 	return (1);
 }

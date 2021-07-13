@@ -5,10 +5,8 @@ SRC				=	main.c	\
 					ph_check_arg.c	\
 					ph_init.c	\
 					ph_init_2.c	\
-					ph_add.c	\
 					ph_exec.c	\
-					ph_exec_2.c	\
-					ph_print.c	\
+					ph_add.c	\
 
 SRCDIR			= src
 OBJDIR			= obj
