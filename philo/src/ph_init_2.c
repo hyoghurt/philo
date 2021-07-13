@@ -17,14 +17,15 @@ int	ph_init_time(t_phil *phil, int num)
 
 int	ph_init_print(t_phil *phil, int num)
 {
-	pthread_mutex_t	print;
+	pthread_mutex_t	*print;
 	int				i;
 
-	if (pthread_mutex_init(&print, 0) != 0)
+	print = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t));
+	if (pthread_mutex_init(print, 0) != 0)
 		return (0);
 	i = -1;
 	while (++i < num)
-		phil[i].print = &print;
+		phil[i].print = print;
 	return (1);
 }
 

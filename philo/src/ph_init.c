@@ -5,6 +5,8 @@ int	ph_init(char **argv, t_phil **phil, pthread_mutex_t **fork)
 	int				num;
 
 	num = (int)ft_atoi_long(argv[1]);
+	if (num <= 0)
+		return (0);
 	*phil = (t_phil *)malloc(num * sizeof(t_phil));
 	if (!(*phil))
 		return (0);

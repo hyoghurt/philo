@@ -30,5 +30,7 @@ void	ph_free(t_phil *phil, pthread_mutex_t *fork)
 	free(phil[0].eat);
 	free(phil[0].death);
 	free(fork);
+	pthread_mutex_destroy(phil[0].print);
+	free(phil[0].print);
 	free(phil);
 }
